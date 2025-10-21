@@ -1,11 +1,12 @@
+from typing import List
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
-
-from ..modules.rbm import RBM
 from tqdm import tqdm
-from typing import List
+
+from rbm import RBM
 
 
 class ClinicalDBM(nn.Module):
@@ -61,7 +62,8 @@ class ClinicalDBM(nn.Module):
                     new_features.append(rbm.pass_through(batch))
                     new_labels.append(labels)
 
-            current_data_loader = DataLoader(TensorDataset(torch.cat(new_features), torch.cat(new_labels)), batch_size=data_loader.batch_size)
+            current_data_loader = DataLoader(TensorDataset(torch.cat(new_features), torch.cat(new_labels)),
+                                             batch_size=data_loader.batch_size)
         print("--- Unsupervised Pre-Training Complete! ---")
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

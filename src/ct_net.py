@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 
-from ..modules.class_capsule import ClassCapsule
-from ..modules.primary_capsule import PrimaryCapsule
+from class_capsule import ClassCapsule
+from primary_capsule import PrimaryCapsule
 
 
 class CTNet(nn.Module):

@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from ..utils.squash import squash
+from squash import squash
 
 
 class ClassCapsule(nn.Module):

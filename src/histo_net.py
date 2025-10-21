@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 
-from ..modules.inception import InceptionModule
-from ..modules.residual import ResidualBlock
+from inception import InceptionModule
+from residual import ResidualBlock
 
 
 class HistoNet(nn.Module):
