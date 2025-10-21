@@ -17,7 +17,7 @@ class EarlyStopping:
                  delta: int = 0,
                  monitor: str = 'val_loss',
                  path: Path = Path('checkpoint.pth'),
-                 mode='min'):
+                 mode='min') -> None:
         if mode not in ['min', 'max']:
             raise ValueError(f"{mode} is not a valid mode ('min', 'max').")
 
