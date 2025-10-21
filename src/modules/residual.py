@@ -1,10 +1,12 @@
 import torch
 import torch.nn as nn
 
+
 class ResidualBlock(nn.Module):
     """
     Custom Residua Block to enable deeper network training.
     """
+
     def __init__(self, channels: int) -> None:
         super(ResidualBlock, self).__init__()
         self.conv_block = nn.Sequential(
