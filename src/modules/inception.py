@@ -1,11 +1,13 @@
 import torch
 import torch.nn as nn
 
+
 class InceptionModule(nn.Module):
     """
     Advanced Inception-like Module with six parallel branches for rich, multiscale feature extraction.
     Includes standard convolutions, large-kernel convolutions, and dilated convolutions.
     """
+
     def __init__(
             self,
             in_channels: int,
