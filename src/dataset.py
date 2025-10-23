@@ -41,8 +41,8 @@ class LungHistDataset(Dataset):
 
             key = f'{superclass.lower()}_{subclass.lower()}'.strip('_')
             key = key.replace(' ', '_')
-            if 'normal' in key:
-                key = 'normal'
+            if 'nor' in key:
+                key = 'nor'
 
             if key in self.class_map:
                 label = self.class_map[key]
