@@ -11,7 +11,7 @@ import torch.nn as nn
 from pathlib import Path
 import os
 
-from torch.utils.data import random_split, DataLoader
+from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
 from PIL import Image
 from torch.utils.data import Dataset
@@ -40,7 +40,7 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    BATCH_SIZE, EPOCHS_S1, EPOCHS_S2, EPOCHS_DBN_PRE, EPOCHS_DBN_FINE = 32, 50, 75, 20, 100
+    BATCH_SIZE, EPOCHS_S1, EPOCHS_S2, EPOCHS_DBN_PRE, EPOCHS_DBN_FINE = 64, 50, 75, 20, 100
 
     # Download latest version
     path = kagglehub.dataset_download("ice778/comprehensive-lung-cancer-imaging-dataset-clid")
@@ -55,7 +55,7 @@ def main():
     image_size = 256
 
     train_transform = T.Compose([
-        T.Resize((image_size, image_size)),
+        T.RandomResizedCrop(image_size),
 
         # Aggressive geometric and spatial transformations
         T.RandomHorizontalFlip(p=0.5),
@@ -73,16 +73,17 @@ def main():
 
         # Convert to Tensor and Normalize
         T.ToTensor(),
-        T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        T.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
 
         # Strong regularization via acclusion
         T.RandomErasing(p=0.75, scale=(0.02, 0.25), ratio=(0.3, 3.3), value=0, inplace=False),
     ])
 
     val_transform = T.Compose([
-        T.Resize((image_size, image_size)),
+        T.Resize(image_size),
+        T.CenterCrop(224),
         T.ToTensor(),
-        T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        T.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
     ])
 
     if os.path.exists(HISTO_DATA_PATH):
@@ -97,8 +98,8 @@ def main():
         train_ds = ImageFilelistDataset(train_paths, train_labels, transform=train_transform)
         val_ds = ImageFilelistDataset(val_paths, val_labels, transform=val_transform)
 
-        train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
-        val_loader = DataLoader(val_ds, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
+        train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True, num_workers=4, pin_memory=True, persistent_workers=True)
+        val_loader = DataLoader(val_ds, batch_size=BATCH_SIZE, shuffle=False, num_workers=4, pin_memory=True, persistent_workers=True)
 
         model = HistoNet(num_classes=len(full_dataset_info.classes)).to(device)
         criterion = nn.CrossEntropyLoss()
@@ -108,4 +109,5 @@ def main():
 
 
 if __name__ == '__main__':
+    torch.backends.cudnn.benchmark = True
     main()

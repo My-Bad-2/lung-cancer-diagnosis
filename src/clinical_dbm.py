@@ -31,6 +31,8 @@ class ClinicalDBM(nn.Module):
             nn.Linear(128, num_classes),
         )
 
+        self.classifier.apply(self._initialize_weights)
+
     def pretrain(self, data_loader, device: torch.Device, epochs_per_layer: int = 15) -> None:
         print("--- Starting Unsupervised Pre-Training ---")
         current_data_loader = data_loader
@@ -70,3 +72,10 @@ class ClinicalDBM(nn.Module):
         for rbm in self.rbms:
             x = rbm.pass_through(x)
         return self.classifier(x)
+
+    def _initialize_weights(self, m):
+        """Applies Kaiming He initialization to Linear layers."""
+        if isinstance(m, nn.Linear):
+            nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+            if m.bias is not None:
+                nn.init.constant_(m.bias, 0)
