@@ -38,3 +38,43 @@ class PrimaryCapsLayer(nn.Module):
         x = self.linear(x)
         x = x.view(x.size(0), -1, self.capsule_dim)
         return x
+
+
+class SaliencyGuidedRouting(nn.Module):
+    """
+    Implements Dynamic Routing with Saliency-Guided Attention Modulation (SGAR).
+    Attention weights modulate the initial routing logits b_ij.
+    """
+    def __init__(self, in_capsules, out_capsules, in_dim, out_dim, iterations=3):
+        super(SaliencyGuidedRouting, self).__init__()
+
+        self.in_capsules: int = in_capsules
+        self.out_capsules: int = out_capsules
+        self.iterations = iterations
+        self.W = nn.Parameter(
+            torch.randn(in_capsules, out_capsules, in_dim, out_dim),
+        )
+
+    def forward(self, u, saliency_attention_weights=None):
+        batch_size = u.size(0)
+        u_hat = torch.einsum('bnd, ndkF -> bnkF', u, self.W)
+        b_ij = torch.zeros(batch_size, self.in_capsules, self.out_capsules, device=u.device)
+
+        # Apply Saliency Modulation
+        if saliency_attention_weights is not None:
+            b_ij *= saliency_attention_weights
+
+        v_j: torch.Tensor = torch.zeros()
+
+        # Dynamic Routing Iterations
+        for i in range(self.iterations):
+            c_ij = F.softmax(b_ij, dim=2)
+            s_j = torch.einsum('bni, bnik -> bik', c_ij, u_hat)
+            v_j = squash(s_j, dim=-1)
+
+            if i < self.iterations - 1:
+                agreement = torch.einsum('bnik, bik -> bni', u_hat, v_j.detach())
+                b_ij += agreement
+
+        return v_j
+
