@@ -2,16 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from torchvision import transforms
 from torchvision.models import vit_b_16, ViT_B_16_Weights
-from torch.utils.data import Dataset, DataLoader
-from PIL import Image
-from pathlib import Path
-
-import pandas as pd
-import os
-import numpy as np
-import json
 
 def squash(s, dim=-1):
     squared_norm = torch.sum(torch.pow(s, 2), dim=dim, keepdim=True)
