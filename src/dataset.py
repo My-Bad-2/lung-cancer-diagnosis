@@ -1,12 +1,10 @@
 from torchvision import transforms
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 from PIL import Image
 from pathlib import Path
 
 import pandas as pd
 import os
-import numpy as np
-import json
 
 
 def _default_transform():
